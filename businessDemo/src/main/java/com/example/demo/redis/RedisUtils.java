@@ -1,6 +1,8 @@
 package com.example.demo.redis;
 
-import com.example.demo.util.GsonUtil;
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +43,7 @@ public class RedisUtils {
 		 */
 		HashMap<String, String> jsonValueMap = new HashMap<String, String>();
 		for (String hashKey : map.keySet()) {
-			String jsonValue = GsonUtil.toJson(map.get(hashKey));
+			String jsonValue = JSONUtil.toJsonStr(map.get(hashKey));
 			jsonValueMap.put(hashKey, jsonValue);
 			logger.trace("hashKey:{} value:{}", hashKey, jsonValue);
 		}
@@ -53,8 +55,7 @@ public class RedisUtils {
 		if (jsonValueMap != null && !jsonValueMap.isEmpty()) {
 			HashMap<String, ArrayList<Integer>> resultMap = new HashMap<String, ArrayList<Integer>>();
 			for (String hashKey : jsonValueMap.keySet()) {
-				ArrayList<Integer> list = GsonUtil.fromJson(jsonValueMap.get(hashKey),
-						GsonUtil.type(ArrayList.class, Integer.class));
+				ArrayList<Integer> list = JSONUtil.toBean(JSONUtil.toJsonStr(jsonValueMap.get(hashKey)),ArrayList.class);
 				resultMap.put(hashKey, list);
 			}
 			return resultMap;
@@ -67,7 +68,7 @@ public class RedisUtils {
 	 */
 	public ArrayList<Integer> getHashValue4JsonValue2(String key, String hashKey) {
 		String jsonValue = (String) getHashValue(key, hashKey);
-		ArrayList<Integer> list = GsonUtil.fromJson(jsonValue, GsonUtil.type(ArrayList.class, Integer.class));
+		ArrayList<Integer> list = JSONUtil.toBean(jsonValue,ArrayList.class);
 		return list;
 	}
 
@@ -82,8 +83,7 @@ public class RedisUtils {
 		List<Object> redisResult = getHashValue(key, hashKeys);
 		if (redisResult != null && !redisResult.isEmpty()) {
 			for (Object jsonStr : redisResult) {
-				ArrayList<Integer> list = GsonUtil.fromJson((String) jsonStr,
-						GsonUtil.type(ArrayList.class, Integer.class));
+				ArrayList<Integer> list = JSONUtil.toBean(JSONUtil.toJsonStr(jsonStr),ArrayList.class);
 				if (list != null && !redisResult.isEmpty()) {
 					result.addAll(list);
 				}
@@ -100,7 +100,7 @@ public class RedisUtils {
 	 * 设置 HashMap<String, ArrayList<Integer>>
 	 */
 	public boolean setListMap(String key, HashMap<String, ArrayList<Integer>> map) {
-		return setString(key, GsonUtil.toJson(map));
+		return setString(key, JSONUtil.toJsonStr(map));
 	}
 
 	public HashMap<String, ArrayList<Integer>> getListMap(String key) {
@@ -108,8 +108,10 @@ public class RedisUtils {
 		if (str == null || str.isEmpty()) {
 			return null;
 		}
-		HashMap<String, ArrayList<Integer>> map = GsonUtil.fromJson(str,
-				GsonUtil.type(HashMap.class, String.class, GsonUtil.type(ArrayList.class, Integer.class)));
+		HashMap<String, ArrayList<Integer>> map = JSONUtil.toBean(JSONUtil.toJsonStr(str),HashMap.class);
+
+//		HashMap<String, ArrayList<Integer>> map = GsonUtil.fromJson(str,
+//				GsonUtil.type(HashMap.class, String.class, GsonUtil.type(ArrayList.class, Integer.class)));
 		return map;
 	}
 
@@ -117,7 +119,7 @@ public class RedisUtils {
 	 * 设置 ArrayList<Integer>
 	 */
 	public boolean setList(String key, ArrayList<Integer> list) {
-		return setString(key, GsonUtil.toJson(list));
+		return setString(key, JSONUtil.toJsonStr(list));
 	}
 
 	public ArrayList<Integer> getList(String key) {
@@ -125,7 +127,8 @@ public class RedisUtils {
 		if (str == null || str.isEmpty()) {
 			return null;
 		}
-		ArrayList<Integer> list = GsonUtil.fromJson(str, GsonUtil.type(ArrayList.class, Integer.class));
+		ArrayList<Integer> list = JSONUtil.toBean(JSONUtil.toJsonStr(str),ArrayList.class);
+
 		return list;
 	}
 
